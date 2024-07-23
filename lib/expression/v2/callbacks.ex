@@ -97,10 +97,23 @@ defmodule Expression.V2.Callbacks do
       function_exported?(Standard, vargs_function_name, 2) ->
         {:vargs, Standard, vargs_function_name}
 
+      # Check if the wrong number of arguments was provided
+      wrong_arity_but_function_exists?(module, exact_function_name) ->
+        {:error, "wrong number of arguments to #{function_name}."}
+
+      # Check if the wrong number of arguments was provided
+      wrong_arity_but_function_exists?(Standard, exact_function_name) ->
+        {:error, "wrong number of arguments to #{function_name}."}
+
       # Otherwise fail
       true ->
         {:error, "#{function_name} is not implemented."}
     end
+  end
+
+  defp wrong_arity_but_function_exists?(module, function_name)
+       when is_atom(module) and is_atom(function_name) do
+    Enum.any?(0..20, fn arity -> Kernel.function_exported?(module, function_name, arity) end)
   end
 
   defmacro __using__(_opts) do
