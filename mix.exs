@@ -55,6 +55,7 @@ defmodule Expression.MixProject do
       {:mix_test_watch, "~> 1.0", only: :dev, runtime: false},
       {:nimble_parsec, "~> 1.1"},
       {:number, "~> 1.0"},
+      {:decimal, "~> 2.0"},
       {:timex, "~> 3.7"},
       {:version_tasks, "~> 0.12.0", only: [:dev], runtime: false}
     ]
