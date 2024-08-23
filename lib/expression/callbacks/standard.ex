@@ -116,6 +116,92 @@ defmodule Expression.Callbacks.Standard do
     end
   end
 
+  @expression_doc doc:
+                    ~s[The SWITCH function evaluates one value (called the expression) against a list of values, and returns the result corresponding to the first matching value. If there is no match, an optional default value (the last one in the list if the list is odd) may be returned],
+                  expression: ~s[SWITCH(1, 1, "Sunday", 2, "Monday", 3, "Tuesday", "No match")],
+                  result: "Sunday"
+  @expression_doc doc:
+                    ~s[The SWITCH function evaluates one value (called the expression) against a list of values, and returns the result corresponding to the first matching value. If there is no match, an optional default value (the last one in the list if the list is odd) may be returned],
+                  expression: ~s[SWITCH(5, 1, "Sunday", 2, "Monday", 3, "Tuesday", "No match")],
+                  result: "No match"
+  def switch_vargs(ctx, arguments) do
+    [key | options] = eval_args!(arguments, ctx)
+    optional = if rem(length(options), 2) == 1, do: List.last(options), else: nil
+
+    options
+    |> Enum.chunk_every(2, 2, :discard)
+    |> Map.new(fn [a, b] -> {a, b} end)
+    |> Map.get(key, optional)
+  end
+
+  @expression_doc doc:
+                    "The ROUND function rounds a number to a specified number of digits. For example, if cell A1 contains 23.7825, and you want to round that value to two decimal places you can do ROUND(23.7825, 2)",
+                  expression: "ROUND(23.7825, 2)",
+                  result: "23.78"
+  @expression_doc doc:
+                    "The ROUND function rounds a number to a specified number of digits. For example, if cell A1 contains 23.7825, and you want to round that value to zero decimal places you can do ROUND(23.7825)",
+                  expression: "ROUND(23.7825)",
+                  result: "24"
+  def round(ctx, value) do
+    [value] = eval_args!([value], ctx)
+
+    value
+    |> Decimal.from_float()
+    |> Decimal.round(0)
+    |> Decimal.to_string(:normal)
+  end
+
+  def round(ctx, value, places) do
+    [value, places] = eval_args!([value, places], ctx)
+
+    value
+    |> Decimal.from_float()
+    |> Decimal.round(places)
+    |> Decimal.to_string(:normal)
+  end
+
+  @doc """
+  MID extracts part of a string, starting at a specified position and for a specified length.
+
+  It correctly handles Unicode characters. For example, taking the first three characters from "héllo" returns "hél".
+
+  If the starting position is beyond the string length, it returns an empty string.
+
+  Implementation based on https://support.microsoft.com/en-us/office/mid-function-2eba57be-0c05-4bdc-bf81-5ecf4421eb8a
+  """
+  @expression_doc doc:
+                    "MID returns a specific number of characters from a text string, starting at the position you specify, based on the number of characters you specify.",
+                  expression: ~s[MID("Fluid", 1, 5)],
+                  result: "Fluid"
+
+  @expression_doc expression: ~s[MID("Fluid Flow", 7, 20)],
+                  result: "Flow"
+
+  @expression_doc expression: ~s[MID("Fluid Flow", 20, 5)],
+                  result: ""
+
+  def mid(ctx, text, start_num, num_chars) do
+    [text, start_num, num_chars] = eval_args!([text, start_num, num_chars], ctx)
+    String.slice(to_string(text), start_num - 1, num_chars)
+  end
+
+  @expression_doc doc:
+                    "Convert a date into any strftime format (ref: https://man7.org/linux/man-pages/man3/strftime.3.html)",
+                  expression: ~s[text(datevalue(date(2022, 09, 14)), "%m/%d/%Y")],
+                  result: "09/14/2022"
+  def text(ctx, value, format) do
+    [value, format] = eval_args!([value, format], ctx)
+
+    value =
+      if is_map(value) and Map.has_key?(value, "date") do
+        Map.get(value, "date")
+      else
+        value
+      end
+
+    Calendar.strftime(value, format)
+  end
+
   @doc """
   Converts date stored in text to an actual date object and
   formats it using `strftime` formatting.
@@ -770,6 +856,37 @@ defmodule Expression.Callbacks.Standard do
   def remove_first_word(ctx, binary, separator) do
     [binary, separator] = eval_args!([binary, separator], ctx)
     tl(String.split(binary, separator)) |> Enum.join(separator)
+  end
+
+  @expression_doc doc:
+                    "Remove the last word from a list of words, using the specified separator ",
+                  expression: ~s{remove_last_word("foo-bar", "-")},
+                  result: "foo"
+  @expression_doc doc:
+                    "Remove the last word from a list of words, using spaces as separator between words ",
+                  expression: "remove_last_word(\"foo bar\")",
+                  result: "foo"
+  def remove_last_word(ctx, binary) do
+    [binary] = eval_args!([binary], ctx)
+    separator = " "
+
+    binary
+    |> String.split(separator)
+    |> Enum.reverse()
+    |> tl()
+    |> Enum.reverse()
+    |> Enum.join(separator)
+  end
+
+  def remove_last_word(ctx, binary, separator) do
+    [binary, separator] = eval_args!([binary, separator], ctx)
+
+    binary
+    |> String.split(separator)
+    |> Enum.reverse()
+    |> tl()
+    |> Enum.reverse()
+    |> Enum.join(separator)
   end
 
   @doc """
