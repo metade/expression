@@ -185,23 +185,6 @@ defmodule Expression.Callbacks.Standard do
     String.slice(to_string(text), start_num - 1, num_chars)
   end
 
-  @expression_doc doc:
-                    "Convert a date into any strftime format (ref: https://man7.org/linux/man-pages/man3/strftime.3.html)",
-                  expression: ~s[text(datevalue(date(2022, 09, 14)), "%m/%d/%Y")],
-                  result: "09/14/2022"
-  def text(ctx, value, format) do
-    [value, format] = eval_args!([value, format], ctx)
-
-    value =
-      if is_map(value) and Map.has_key?(value, "date") do
-        Map.get(value, "date")
-      else
-        value
-      end
-
-    Calendar.strftime(value, format)
-  end
-
   @doc """
   Converts date stored in text to an actual date object and
   formats it using `strftime` formatting.
