@@ -109,7 +109,7 @@ defmodule Expression.Callbacks do
 
   defp wrong_arity_but_function_exists?(module, function_name)
        when is_atom(module) and is_atom(function_name) do
-    Enum.any?(0..20, fn arity -> Kernel.function_exported?(module, function_name, arity) end)
+    module.__info__(:functions)[function_name] != nil
   end
 
   defmacro __using__(_opts) do
