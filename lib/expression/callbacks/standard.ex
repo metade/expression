@@ -1488,6 +1488,11 @@ defmodule Expression.Callbacks.Standard do
   """
   @expression_doc expression: "has_pattern(\"Buy cheese please\", \"buy (\\w+)\")", result: true
   @expression_doc expression: "has_pattern(\"Sell cheese please\", \"buy (\\w+)\")", result: false
+  @expression_doc expression: "has_pattern(nil, \"buy (\\w+)\")", result: false
+  def has_pattern(nil, _expression, _pattern) do
+    false
+  end
+
   def has_pattern(ctx, expression, pattern) do
     [expression, pattern] = eval_args!([expression, pattern], ctx)
 
