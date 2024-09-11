@@ -1489,14 +1489,11 @@ defmodule Expression.Callbacks.Standard do
   @expression_doc expression: "has_pattern(\"Buy cheese please\", \"buy (\\w+)\")", result: true
   @expression_doc expression: "has_pattern(\"Sell cheese please\", \"buy (\\w+)\")", result: false
   @expression_doc expression: "has_pattern(nil, \"buy (\\w+)\")", result: false
-  def has_pattern(nil, _expression, _pattern) do
-    false
-  end
-
   def has_pattern(ctx, expression, pattern) do
     [expression, pattern] = eval_args!([expression, pattern], ctx)
 
-    with {:ok, regex} <- Regex.compile(String.trim(pattern), "i"),
+    with false <- is_nil(expression),
+         {:ok, regex} <- Regex.compile(String.trim(pattern), "i"),
          [[_first | _remainder]] <- Regex.scan(regex, String.trim(expression), capture: :all) do
       # Future match result: first
       true
