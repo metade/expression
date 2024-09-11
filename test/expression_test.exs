@@ -37,18 +37,18 @@ defmodule ExpressionTest do
 
       assert true ==
                Expression.evaluate_as_boolean!(
-                 "@has_pattern(\"Buy cheese please\", \"buy (\\w+)\")",
+                 "@has_pattern('Buy cheese please', 'buy (\\w+)')",
                  %{}
                )
 
       assert false ==
                Expression.evaluate_as_boolean!(
-                 "@has_pattern(\"Sell cheese please\", \"buy (\\w+)\")",
+                 "@has_pattern('Sell cheese please', 'buy (\\w+)')",
                  %{}
                )
 
       assert false ==
-               Expression.evaluate_as_boolean!("@has_pattern(nil, \"buy (\\w+)\")", %{})
+               Expression.evaluate_as_boolean!("@has_pattern(nil, 'buy (\\w+)')", %{})
     end
 
     test "evaluate_as_boolean! with kernel operators" do
