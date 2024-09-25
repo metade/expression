@@ -1492,7 +1492,7 @@ defmodule Expression.Callbacks.Standard do
   def has_pattern(ctx, expression, pattern) do
     [expression, pattern] = eval_args!([expression, pattern], ctx)
 
-    with false <- is_nil(expression),
+    with true <- is_binary(expression),
          {:ok, regex} <- Regex.compile(String.trim(pattern), "i"),
          [[_first | _remainder]] <- Regex.scan(regex, String.trim(expression), capture: :all) do
       # Future match result: first
