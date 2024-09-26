@@ -34,6 +34,21 @@ defmodule ExpressionTest do
                Expression.evaluate_as_boolean!("@has_beginning(contact.number, \"123\")", %{
                  "contact" => %{"number" => 123_456}
                })
+
+      assert true ==
+               Expression.evaluate_as_boolean!(
+                 "@has_pattern('Buy cheese please', 'buy (\\w+)')",
+                 %{}
+               )
+
+      assert false ==
+               Expression.evaluate_as_boolean!(
+                 "@has_pattern('Sell cheese please', 'buy (\\w+)')",
+                 %{}
+               )
+
+      assert false ==
+               Expression.evaluate_as_boolean!("@has_pattern(nil, 'buy (\\w+)')", %{})
     end
 
     test "evaluate_as_boolean! with kernel operators" do
@@ -429,6 +444,21 @@ defmodule ExpressionTest do
 
       expected = Timex.format!(DateTime.utc_now(), "%Y-%m-%d", :strftime)
       assert {:ok, expected} == Expression.evaluate("@(DATEVALUE(NOW(), \"%Y-%m-%d\"))")
+    end
+
+    test "lazy argument evaluation in ifs" do
+      context = %{
+        "status" => nil
+      }
+
+      assert false ==
+               Expression.evaluate!(~S|@if(status, left(status, 2), false)|, context)
+
+      assert false ==
+               Expression.evaluate!(~S|@if(isstring(status), left(status, 2), false)|, context)
+
+      assert false ==
+               Expression.evaluate!(~S|@if(LEN(status) > 0, LEFT(status, 2), false)|, context)
     end
 
     test "checking for nil vars with if" do
