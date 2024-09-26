@@ -1262,6 +1262,9 @@ defmodule Expression.Callbacks.Standard do
     !!group
   end
 
+  defp extract_numberish(nil), do: nil
+  defp extract_numberish(value) when is_number(value), do: value
+
   defp extract_numberish(expression) do
     with [match] <-
            Regex.run(~r/([0-9]+\.?[0-9]*)/u, replace_arabic_numerals(expression), capture: :first),
