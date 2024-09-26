@@ -824,12 +824,23 @@ defmodule Expression.Callbacks.Standard do
   @expression_doc expression: "remove_first_word(nil, \"-\")", result: ""
   def remove_first_word(ctx, binary) do
     separator = " "
-    binary |> eval!(ctx) |> to_string() |> String.split(separator) |> tl() |> Enum.join(separator)
+
+    binary
+    |> eval!(ctx)
+    |> to_string()
+    |> String.split(separator)
+    |> tl()
+    |> Enum.join(separator)
   end
 
   def remove_first_word(ctx, binary, separator) do
     [binary, separator] = eval_args!([binary, separator], ctx)
-    binary |> to_string() |> String.split(separator) |> tl() |> Enum.join(separator)
+
+    binary
+    |> to_string()
+    |> String.split(separator)
+    |> tl()
+    |> Enum.join(separator)
   end
 
   @doc """
@@ -1659,7 +1670,11 @@ defmodule Expression.Callbacks.Standard do
   @expression_doc expression: "has_text(123)", result: true
   @expression_doc expression: "has_text(nil)", result: false
   def has_text(ctx, expression) do
-    expression = expression |> eval!(ctx) |> to_string()
+    expression =
+      expression
+      |> eval!(ctx)
+      |> to_string()
+
     String.trim(to_string(expression)) != ""
   end
 
