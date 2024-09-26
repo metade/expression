@@ -1353,6 +1353,9 @@ defmodule Expression.Callbacks.Standard do
     !!group
   end
 
+  defp extract_numberish(nil), do: nil
+  defp extract_numberish(value) when is_number(value), do: value
+
   defp extract_numberish(expression) do
     with [match] <-
            Regex.run(~r/([0-9]+\.?[0-9]*)/u, replace_arabic_numerals(expression), capture: :first),
@@ -1583,9 +1586,9 @@ defmodule Expression.Callbacks.Standard do
   def has_pattern(ctx, expression, pattern) do
     [expression, pattern] = eval_args!([expression, pattern], ctx)
 
-    with {:ok, regex} <- Regex.compile(String.trim(pattern), "i"),
-         [[_first | _remainder]] <-
-           Regex.scan(regex, String.trim(to_string(expression)), capture: :all) do
+    with true <- is_binary(expression),
+         {:ok, regex} <- Regex.compile(String.trim(pattern), "i"),
+         [[_first | _remainder]] <- Regex.scan(regex, String.trim(expression), capture: :all) do
       # Future match result: first
       true
     else
