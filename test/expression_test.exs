@@ -446,6 +446,21 @@ defmodule ExpressionTest do
       assert {:ok, expected} == Expression.evaluate("@(DATEVALUE(NOW(), \"%Y-%m-%d\"))")
     end
 
+    test "lazy argument evaluation in ifs" do
+      context = %{
+        "status" => nil
+      }
+
+      assert false ==
+               Expression.evaluate!(~S|@if(status, left(status, 2), false)|, context)
+
+      assert false ==
+               Expression.evaluate!(~S|@if(isstring(status), left(status, 2), false)|, context)
+
+      assert false ==
+               Expression.evaluate!(~S|@if(LEN(status) > 0, LEFT(status, 2), false)|, context)
+    end
+
     test "checking for nil vars with if" do
       assert 1 ==
                Expression.evaluate!("@IF(value, value, 0)", %{
